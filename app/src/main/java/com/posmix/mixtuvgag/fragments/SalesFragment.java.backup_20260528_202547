@@ -1,0 +1,652 @@
+package com.posmix.mixtuvgag.fragments;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.net.Uri;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.*;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.database.*;
+import com.posmix.mixtuvgag.R;
+import com.posmix.mixtuvgag.adapters.CartHorizontalAdapter;
+import com.posmix.mixtuvgag.adapters.SearchResultAdapter;
+import com.posmix.mixtuvgag.models.*;
+import com.posmix.mixtuvgag.viewmodels.SalesViewModel;
+import com.posmix.mixtuvgag.database.AppDatabase;
+import com.posmix.mixtuvgag.utils.InvoicePdfHelper;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class SalesFragment extends Fragment {
+    private SalesViewModel viewModel;
+    private CartHorizontalAdapter cartAdapter;
+    private SearchResultAdapter searchAdapter;
+    private List<CartItem> cart = new ArrayList<>();
+    private List<Product> allProducts = new ArrayList<>();
+    private List<Customer> allCustomers = new ArrayList<>();
+    private EditText etSearch;
+    private TextView tvTotal;
+    private Button btnCheckout;
+    private String currencySymbol = "ر.س";
+    private static final String TAG = "SalesFragment";
+    private DatabaseReference firebaseRef;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_sales, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        loadCurrencySettings();
+        
+        // تهيئة Firebase
+        firebaseRef = FirebaseDatabase.getInstance().getReference();
+        
+        etSearch = view.findViewById(R.id.etSearch);
+        tvTotal = view.findViewById(R.id.tvCartTotal);
+        btnCheckout = view.findViewById(R.id.btnCheckout);
+        
+        setupRecyclerViews(view);
+        setupObservers();
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { filterSearch(s.toString()); }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        searchAdapter.setOnProductClickListener(p -> {
+            addItem(p);
+            etSearch.setText("");
+            view.findViewById(R.id.cardSearchResults).setVisibility(View.GONE);
+        });
+
+        cartAdapter.setOnCartItemClickListener(item -> showEditCartItemDialog(item));
+        btnCheckout.setOnClickListener(v -> showCheckoutDialog());
+        
+        updateUI();
+    }
+
+    private void setupRecyclerViews(View view) {
+        RecyclerView rvCart = view.findViewById(R.id.rvCartHorizontal);
+        cartAdapter = new CartHorizontalAdapter();
+        rvCart.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvCart.setAdapter(cartAdapter);
+
+        RecyclerView rvResults = view.findViewById(R.id.rvSearchResults);
+        searchAdapter = new SearchResultAdapter();
+        rvResults.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvResults.setAdapter(searchAdapter);
+    }
+
+    private void setupObservers() {
+        viewModel = new ViewModelProvider(this).get(SalesViewModel.class);
+        viewModel.getProducts().observe(getViewLifecycleOwner(), products -> this.allProducts = products);
+        viewModel.getCustomers().observe(getViewLifecycleOwner(), customers -> {
+            if (customers != null) {
+                this.allCustomers.clear();
+                this.allCustomers.addAll(customers);
+            }
+        });
+    }
+
+    private void loadCurrencySettings() {
+        if (getContext() != null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+            currencySymbol = prefs.getString("currency", "ر.س");
+        }
+    }
+
+    /**
+     * إنشاء رقم فاتورة تسلسلي مع التحقق من Firebase
+     */
+    private void generateNextInvoiceNumber(InvoiceNumberCallback callback) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                // أولاً: جلب آخر رقم من قاعدة البيانات المحلية
+                int lastLocalNumber = getLastLocalInvoiceNumber();
+                
+                // ثانياً: التحقق من Firebase
+                DatabaseReference invoiceRef = firebaseRef.child("app_data").child("invoices");
+                DatabaseReference counterRef = firebaseRef.child("app_data").child("invoice_counter");
+                
+                // استخدام CountDownLatch للانتظار حتى اكتمال عملية Firebase
+                CountDownLatch latch = new CountDownLatch(1);
+                final int[] firebaseMaxNumber = {lastLocalNumber};
+                
+                // جلب جميع أرقام الفواتير من Firebase للتحقق
+                final int finalLastLocalNumber = lastLocalNumber;
+                invoiceRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        final int[] maxNumber = {finalLastLocalNumber};
+                        
+                        if (snapshot.exists()) {
+                            for (DataSnapshot invoiceSnap : snapshot.getChildren()) {
+                                String invoiceNumber = invoiceSnap.child("invoiceNumber").getValue(String.class);
+                                if (invoiceNumber != null && invoiceNumber.startsWith("INV-")) {
+                                    try {
+                                        int num = Integer.parseInt(invoiceNumber.substring(4));
+                                        if (num > maxNumber[0]) {
+                                            maxNumber[0] = num;
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        // تجاهل الأرقام غير الصالحة
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // أيضاً التحقق من عداد الفواتير
+                        counterRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot counterSnapshot) {
+                                Integer counterValue = counterSnapshot.getValue(Integer.class);
+                                if (counterValue != null && counterValue > maxNumber[0]) {
+                                    maxNumber[0] = counterValue;
+                                }
+                                
+                                firebaseMaxNumber[0] = maxNumber[0];
+                                latch.countDown();
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                latch.countDown();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        latch.countDown();
+                    }
+                });
+                
+                // انتظار حتى 10 ثوانٍ كحد أقصى
+                latch.await(10, TimeUnit.SECONDS);
+                
+                // إنشاء الرقم الجديد
+                int nextNumber = firebaseMaxNumber[0] + 1;
+                String newInvoiceNumber = "INV-" + nextNumber;
+                
+                // تحديث العداد في Firebase
+                counterRef.setValue(nextNumber);
+                
+                // تحديث العداد محلياً
+                updateLocalCounter(nextNumber);
+                
+                // إرجاع النتيجة
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> callback.onNumberGenerated(newInvoiceNumber));
+                }
+                
+            } catch (Exception e) {
+                Log.e(TAG, "خطأ في إنشاء رقم الفاتورة", e);
+                // في حالة الخطأ، استخدم التوقيت كرقم احتياطي
+                String fallbackNumber = "INV-" + (System.currentTimeMillis() / 1000);
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> callback.onNumberGenerated(fallbackNumber));
+                }
+            }
+        });
+    }
+    
+    private int getLastLocalInvoiceNumber() {
+        int maxNumber = 0;
+        try {
+            AppDatabase db = AppDatabase.getInstance(getContext());
+            List<Invoice> invoices = db.invoiceDao().getAllSync();
+            if (invoices != null) {
+                for (Invoice inv : invoices) {
+                    String num = inv.getInvoiceNumber();
+                    if (num != null && num.startsWith("INV-")) {
+                        try {
+                            int n = Integer.parseInt(num.substring(4));
+                            if (n > maxNumber) maxNumber = n;
+                        } catch (NumberFormatException e) {
+                            // تجاهل
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "خطأ في جلب آخر رقم فاتورة محلي", e);
+        }
+        return maxNumber;
+    }
+    
+    private void updateLocalCounter(int counter) {
+        // يمكن تخزين العداد في SharedPreferences
+        if (getContext() != null) {
+            SharedPreferences prefs = getContext().getSharedPreferences("invoice_counter", android.content.Context.MODE_PRIVATE);
+            prefs.edit().putInt("last_invoice_number", counter).apply();
+        }
+    }
+    
+    interface InvoiceNumberCallback {
+        void onNumberGenerated(String invoiceNumber);
+    }
+
+    private void showCheckoutDialog() {
+        if (cart.isEmpty()) {
+            Toast.makeText(getContext(), "❌ لا يمكن إتمام البيع: الفاتورة فارغة", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_checkout, null);
+        TextView tvTotalDisplay = dialogView.findViewById(R.id.tv_total_display);
+        TextView tvBalanceDisplay = dialogView.findViewById(R.id.tv_balance_display);
+        EditText etDiscount = dialogView.findViewById(R.id.et_discount);
+        EditText etPaid = dialogView.findViewById(R.id.et_paid_amount);
+        AutoCompleteTextView actvCustomer = dialogView.findViewById(R.id.actv_customer);
+        RadioGroup rgPayment = dialogView.findViewById(R.id.rg_payment_type);
+        EditText etNotes = dialogView.findViewById(R.id.et_notes);
+
+        double subtotal = 0;
+        for (CartItem item : cart) subtotal += item.getFinalTotal();
+        final double finalSubtotal = subtotal;
+
+        tvTotalDisplay.setText(String.format(Locale.US, "الإجمالي: %.2f %s", finalSubtotal, currencySymbol));
+        etPaid.setText(String.format(Locale.US, "%.2f", finalSubtotal));
+
+        TextWatcher checkWatcher = new TextWatcher() {
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                try {
+                    double disc = Double.parseDouble(cleanNumber(etDiscount.getText().toString().isEmpty() ? "0" : etDiscount.getText().toString()));
+                    double paid = Double.parseDouble(cleanNumber(etPaid.getText().toString().isEmpty() ? "0" : etPaid.getText().toString()));
+                    double remaining = finalSubtotal - disc - paid;
+                    tvBalanceDisplay.setText(String.format(Locale.US, "المتبقي: %.2f %s", remaining, currencySymbol));
+                } catch (Exception e) {}
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+        };
+        etDiscount.addTextChangedListener(checkWatcher);
+        etPaid.addTextChangedListener(checkWatcher);
+
+        if (getContext() != null) {
+            ArrayAdapter<Customer> customerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, allCustomers);
+            actvCustomer.setAdapter(customerAdapter);
+        }
+
+        new AlertDialog.Builder(getContext())
+            .setTitle("💳 إتمام عملية البيع")
+            .setView(dialogView)
+            .setPositiveButton("تأكيد وحفظ", (dialog, which) -> {
+                String notes = (etNotes != null && etNotes.getText() != null)
+                        ? etNotes.getText().toString().trim() : "";
+                generateNextInvoiceNumber(invoiceNumber -> {
+                    saveInvoice(rgPayment, etDiscount, etPaid, actvCustomer, finalSubtotal, invoiceNumber, notes);
+                });
+            })
+            .setNegativeButton("إلغاء", null)
+            .show();
+    }
+
+    private void saveInvoice(RadioGroup rg, EditText etDisc, EditText etPaid, AutoCompleteTextView actv, double subtotal, String invoiceNumber, String notes) {
+        try {
+            // بناء كائن الفاتورة
+            Invoice inv = new Invoice();
+            inv.setType(Invoice.TYPE_SALE);
+            inv.setDate(System.currentTimeMillis());
+            inv.setInvoiceNumber(invoiceNumber); // استخدام الرقم التسلسلي الجديد
+            if (notes != null && !notes.isEmpty()) inv.setNotes(notes);
+            
+            double disc = Double.parseDouble(cleanNumber(etDisc.getText().toString().isEmpty() ? "0" : etDisc.getText().toString()));
+            double paid = Double.parseDouble(cleanNumber(etPaid.getText().toString().isEmpty() ? "0" : etPaid.getText().toString()));
+            
+            inv.setSubtotal(subtotal);
+            inv.setDiscount(disc);
+            inv.setTotal(subtotal - disc);
+            inv.setPaidAmount(paid);
+            inv.setRemainingAmount(inv.getTotal() - paid);
+
+            int checkedId = rg.getCheckedRadioButtonId();
+            int paymentStatus;
+            if (checkedId == R.id.rb_cash) {
+                paymentStatus = Invoice.STATUS_CASH;
+            } else if (checkedId == R.id.rb_card) {
+                paymentStatus = Invoice.STATUS_CARD;
+            } else {
+                paymentStatus = Invoice.STATUS_CREDIT;
+            }
+            inv.setPaymentStatus(paymentStatus);
+
+            // التحقق من العميل في حالة البيع الآجل
+            String customerName = actv.getText().toString().trim();
+            Customer selectedCustomer = null;
+            
+            if (!customerName.isEmpty()) {
+                for (Customer c : allCustomers) {
+                    if (c.getName().equalsIgnoreCase(customerName)) {
+                        selectedCustomer = c;
+                        inv.setCustomerId(c.getId());
+                        break;
+                    }
+                }
+            }
+
+            // للبيع الآجل: يجب اختيار عميل
+            if (paymentStatus == Invoice.STATUS_CREDIT && inv.getCustomerId() == null) {
+                Toast.makeText(getContext(), "⚠️ يجب اختيار عميل للبيع الآجل", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            final Customer finalSelectedCustomer = selectedCustomer;
+            final int finalPaymentStatus = paymentStatus;
+
+            Executors.newSingleThreadExecutor().execute(() -> {
+                AppDatabase db = AppDatabase.getInstance(getContext());
+                
+                try {
+                    db.getWritableDatabase().beginTransaction();
+                    
+                    // 1. حفظ الفاتورة
+                    long invId = db.invoiceDao().insert(inv);
+                    List<InvoiceItem> itemsList = new ArrayList<>();
+                    
+                    for (CartItem ci : cart) {
+                        InvoiceItem item = new InvoiceItem();
+                        item.setInvoiceId((int)invId);
+                        item.setProductId(ci.getProductId());
+                        item.setProductName(ci.getProductName());
+                        item.setQuantity(ci.getQuantity());
+                        item.setUnitPrice(ci.getUnitPrice());
+                        item.setTotalPrice(ci.getFinalTotal());
+                        db.invoiceDao().insertItem(item);
+                        
+                        // تحديث المخزون (خصم الكمية)
+                        db.productDao().decreaseStock(ci.getProductId(), (int) ci.getQuantity());
+                        itemsList.add(item);
+                    }
+
+                    // 2. تسجيل الحركة المالية في الصندوق (للمدفوعات النقدية)
+                    if (finalPaymentStatus == Invoice.STATUS_CASH && inv.getPaidAmount() > 0) {
+                        CashTransaction trans = new CashTransaction();
+                        trans.setType(CashTransaction.TYPE_IN);
+                        trans.setAmount(inv.getPaidAmount());
+                        trans.setDate(System.currentTimeMillis());
+                        trans.setDescription("مبيعات نقدية - فاتورة رقم: " + inv.getInvoiceNumber());
+                        trans.setReferenceId((int)invId);
+                        trans.setReferenceType("SALE");
+                        db.cashTransactionDao().insert(trans);
+                    }
+                    
+                    // 3. تحديث رصيد العميل (الأهم للبيع الآجل)
+                    if (finalPaymentStatus == Invoice.STATUS_CREDIT && inv.getCustomerId() != null) {
+                        Customer customer = db.customerDao().getByIdSync(inv.getCustomerId());
+                        if (customer != null) {
+                            double oldBalance = customer.getCurrentBalance();
+                            double newBalance = oldBalance + inv.getTotal();
+                            customer.setCurrentBalance(newBalance);
+                            db.customerDao().update(customer);
+                            
+                            Log.d(TAG, "✅ تحديث رصيد العميل: " + customer.getName() + 
+                                  " | من " + oldBalance + " إلى " + newBalance +
+                                  " (فاتورة آجلة: " + inv.getInvoiceNumber() + ")");
+                        }
+                    }
+                    
+                    db.getWritableDatabase().setTransactionSuccessful();
+                    
+                    // رفع الفاتورة إلى Firebase
+                    uploadInvoiceToFirebase(inv, itemsList);
+                    
+                    // عرض النتيجة
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            String message;
+                            if (finalPaymentStatus == Invoice.STATUS_CREDIT) {
+                                message = "✅ تمت عملية البيع الآجل\nتم إضافة " + String.format("%.2f", inv.getTotal()) + " ر.س إلى حساب العميل";
+                            } else {
+                                message = "✅ تمت عملية البيع بنجاح\nرقم الفاتورة: " + invoiceNumber;
+                            }
+                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                            showPostSaleOptions(inv, itemsList);
+                            cart.clear();
+                            updateUI();
+                        });
+                    }
+                    
+                } catch (Exception e) {
+                    Log.e(TAG, "خطأ في حفظ الفاتورة", e);
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> 
+                            Toast.makeText(getContext(), "❌ خطأ: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                    }
+                } finally {
+                    db.getWritableDatabase().endTransaction();
+                }
+            });
+        } catch (Exception e) {
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> 
+                    Toast.makeText(getContext(), "❌ خطأ في إدخال البيانات", Toast.LENGTH_SHORT).show());
+            }
+        }
+    }
+    
+    /**
+     * رفع الفاتورة إلى Firebase
+     */
+    private void uploadInvoiceToFirebase(Invoice invoice, List<InvoiceItem> items) {
+        try {
+            DatabaseReference invoiceRef = firebaseRef.child("app_data").child("invoices").child(String.valueOf(invoice.getId()));
+            
+            Map<String, Object> invoiceData = new HashMap<>();
+            invoiceData.put("id", invoice.getId());
+            invoiceData.put("invoiceNumber", invoice.getInvoiceNumber());
+            invoiceData.put("type", invoice.getType());
+            invoiceData.put("customerId", invoice.getCustomerId());
+            invoiceData.put("date", invoice.getDate());
+            invoiceData.put("subtotal", invoice.getSubtotal());
+            invoiceData.put("taxAmount", invoice.getTaxAmount());
+            invoiceData.put("discount", invoice.getDiscount());
+            invoiceData.put("total", invoice.getTotal());
+            invoiceData.put("paidAmount", invoice.getPaidAmount());
+            invoiceData.put("remainingAmount", invoice.getRemainingAmount());
+            invoiceData.put("paymentStatus", invoice.getPaymentStatus());
+            invoiceData.put("notes", invoice.getNotes() != null ? invoice.getNotes() : "");
+            
+            // إضافة عناصر الفاتورة
+            List<Map<String, Object>> itemsList = new ArrayList<>();
+            for (InvoiceItem item : items) {
+                Map<String, Object> itemData = new HashMap<>();
+                itemData.put("productId", item.getProductId());
+                itemData.put("productName", item.getProductName());
+                itemData.put("quantity", item.getQuantity());
+                itemData.put("unitPrice", item.getUnitPrice());
+                itemData.put("total", item.getTotalPrice());
+                itemsList.add(itemData);
+            }
+            invoiceData.put("items", itemsList);
+            
+            invoiceRef.setValue(invoiceData)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ تم رفع الفاتورة إلى Firebase: " + invoice.getInvoiceNumber()))
+                .addOnFailureListener(e -> Log.e(TAG, "❌ فشل رفع الفاتورة إلى Firebase", e));
+                
+        } catch (Exception e) {
+            Log.e(TAG, "خطأ في رفع الفاتورة إلى Firebase", e);
+        }
+    }
+
+    private void showPostSaleOptions(Invoice invoice, List<InvoiceItem> items) {
+        String[] options = {"📄 فاتورة حرارية (PDF)", "💬 إرسال واتساب", "🖨️ طباعة مباشرة"};
+        new AlertDialog.Builder(getContext())
+            .setTitle("تم الحفظ بنجاح - " + invoice.getInvoiceNumber())
+            .setItems(options, (dialog, which) -> {
+                File pdfFile = InvoicePdfHelper.generateThermalPdf(getContext(), invoice, items);
+                switch (which) {
+                    case 0: openFile(pdfFile); break;
+                    case 1: shareToWhatsApp(pdfFile); break;
+                    case 2: Toast.makeText(getContext(), "جاري الاتصال بالطابعة...", Toast.LENGTH_SHORT).show(); break;
+                }
+            })
+            .setPositiveButton("إغلاق", null)
+            .show();
+    }
+
+    private void openFile(File file) {
+        if (file == null) return;
+        try {
+            Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, "application/pdf");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "لا يوجد تطبيق لفتح PDF", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void shareToWhatsApp(File file) {
+        if (file == null) return;
+        try {
+            Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("application/pdf");
+            intent.setPackage("com.whatsapp");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "واتساب غير مثبت", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showEditCartItemDialog(CartItem item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_invoice_item_detail, null);
+
+        TextView tvName = view.findViewById(R.id.tv_item_product_name);
+        TextView tvTotalItem = view.findViewById(R.id.tv_item_total_price);
+        EditText etQty = view.findViewById(R.id.et_item_quantity);
+        EditText etPrice = view.findViewById(R.id.et_item_sell_price);
+        Button btnDelete = view.findViewById(R.id.btn_remove_item);
+
+        tvName.setText(item.getProductName());
+        etQty.setText(String.format(Locale.US, "%d", item.getQuantity()));
+        etPrice.setText(String.format(Locale.US, "%.2f", item.getUnitPrice()));
+
+        TextWatcher watcher = new TextWatcher() {
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                try {
+                    double q = Double.parseDouble(cleanNumber(etQty.getText().toString()));
+                    double p = Double.parseDouble(cleanNumber(etPrice.getText().toString()));
+                    tvTotalItem.setText(String.format(Locale.US, "%.2f %s", q * p, currencySymbol));
+                } catch (Exception e) {}
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+        };
+        etQty.addTextChangedListener(watcher);
+        etPrice.addTextChangedListener(watcher);
+        etQty.setText(etQty.getText()); 
+
+        AlertDialog dialog = builder.setView(view)
+                .setPositiveButton("تعديل", (d, w) -> {
+                    try {
+                        item.setQuantity((int)Double.parseDouble(cleanNumber(etQty.getText().toString())));
+                        item.setUnitPrice(Double.parseDouble(cleanNumber(etPrice.getText().toString())));
+                        updateUI();
+                    } catch (Exception e) {}
+                })
+                .setNegativeButton("إلغاء", null)
+                .create();
+
+        btnDelete.setOnClickListener(v -> { cart.remove(item); updateUI(); dialog.dismiss(); });
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setSoftInputMode(
+                android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
+        dialog.show();
+
+        // تحديد كمية الصنف تلقائياً وفتح لوحة المفاتيح
+        etQty.post(() -> {
+            etQty.requestFocus();
+            etQty.selectAll();
+            android.view.inputmethod.InputMethodManager imm =
+                (android.view.inputmethod.InputMethodManager)
+                    requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.showSoftInput(etQty, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+    }
+
+    private String cleanNumber(String input) {
+        if (input == null || input.isEmpty()) return "0";
+        return input.replaceAll("١", "1").replaceAll("٢", "2").replaceAll("٣", "3")
+                    .replaceAll("٤", "4").replaceAll("٥", "5").replaceAll("٦", "6")
+                    .replaceAll("٧", "7").replaceAll("٨", "8").replaceAll("٩", "9")
+                    .replaceAll("٠", "0").trim();
+    }
+
+    private void filterSearch(String q) {
+        View card = getView().findViewById(R.id.cardSearchResults);
+        if (q.isEmpty()) { card.setVisibility(View.GONE); return; }
+        List<Product> f = new ArrayList<>();
+        for (Product p : allProducts) {
+            if (p.getName().toLowerCase().contains(q.toLowerCase()) || (p.getBarcode() != null && p.getBarcode().contains(q)))
+                f.add(p);
+        }
+        searchAdapter.submitList(f);
+        card.setVisibility(f.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    private void addItem(Product p) {
+        boolean exists = false;
+        for (CartItem item : cart) {
+            if (item.getProductId() == p.getId()) { 
+                item.setQuantity(item.getQuantity() + 1); 
+                exists = true; 
+                break; 
+            }
+        }
+        if (!exists) cart.add(new CartItem(p.getId(), p.getName(), p.getSellPrice(), p.getTaxPercentage(), 1));
+        updateUI();
+    }
+
+    private void updateUI() {
+        cartAdapter.submitList(new ArrayList<>(cart));
+        double total = 0;
+        for (CartItem i : cart) total += i.getFinalTotal();
+        tvTotal.setText(String.format(Locale.US, "%.2f %s", total, currencySymbol));
+        View emptyView = getView().findViewById(R.id.tvEmptyCart);
+        if (emptyView != null) emptyView.setVisibility(cart.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadCurrencySettings();
+        updateUI();
+    }
+}
