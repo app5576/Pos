@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MicroPOS</string>
+    <string name="open_drawer">فتح القائمة</string>
+    <string name="close_drawer">إغلاق القائمة</string>
+    <string-array name="default_customer_option">
+        <item>بدون عميل</item>
+    </string-array>
+    
+    <!-- Navigation Items -->
+    <string name="nav_sales">المبيعات</string>
+    <string name="nav_inventory">المخزون</string>
+    <string name="nav_customers">العملاء</string>
+    <string name="nav_reports">التقارير</string>
+    <string name="nav_more">المزيد</string>
+    
+    <!-- Menu Options -->
+    <string name="menu_suppliers">الموردون</string>
+    <string name="menu_purchases">المشتريات</string>
+    <string name="menu_cash_fund">الصندوق</string>
+    <string name="menu_expenses">المصاريف</string>
+    <string name="menu_settings">الإعدادات</string>
+    <string name="menu_sync">مزامنة</string>
+    <string name="menu_logout">تسجيل الخروج</string>
+    
+    <!-- Dialogs -->
+    <string name="more_options">خيارات إضافية</string>
+    <string name="syncing">جاري المزامنة...</string>
+    
+    <!-- Messages -->
+    <string name="sync_success">تمت المزامنة بنجاح!</string>
+    <string name="sync_failed">فشلت المزامنة!</string>
+    <string name="error_message">حدث خطأ ما</string>
+    <string name="success_message">تمت العملية بنجاح</string>
+    
+    <!-- Buttons -->
+    <string name="btn_save">حفظ</string>
+    <string name="btn_cancel">إلغاء</string>
+    <string name="btn_delete">حذف</string>
+    <string name="btn_edit">تعديل</string>
+    <string name="btn_add">إضافة</string>
+    <string name="btn_ok">موافق</string>
+    
+    <!-- Forms -->
+    <string name="label_name">الاسم</string>
+    <string name="label_email">البريد الإلكتروني</string>
+    <string name="label_phone">رقم الهاتف</string>
+    <string name="label_address">العنوان</string>
+    <string name="label_price">السعر</string>
+    <string name="label_quantity">الكمية</string>
+    <string name="label_category">الفئة</string>
+    
+    <!-- Titles -->
+    <string name="title_categories">الفئات</string>
+    <string name="title_products">المنتجات</string>
+    <string name="title_invoices">الفواتير</string>
+    <string name="title_transactions">المعاملات</string>
+    
+    <!-- Barcode -->
+    <string name="barcode_scan">مسح الباركود</string>
+    <string name="barcode_invalid">باركود غير صحيح</string>
+    <string name="barcode_not_found">المنتج غير موجود</string>
+    
+    <!-- Tax -->
+    <string name="tax_rate">معدل الضريبة</string>
+    <string name="tax_amount">مبلغ الضريبة</string>
+    <string name="vat">ضريبة القيمة المضافة</string>
+    
+    <!-- Reports -->
+    <string name="report_sales">تقرير المبيعات</string>
+    <string name="report_earnings">تقرير الأرباح</string>
+    <string name="report_inventory">تقرير المخزون</string>
+    <string name="report_customers">تقرير العملاء</string>
+    <string name="report_suppliers">تقرير الموردين</string>
+    <string name="report_expenses">تقرير المصاريف</string>
+    <string name="report_customer_statement_of_account">كشف حساب عميل</string>
+    
+    <!-- Invoice -->
+    <string name="invoice_number">رقم الفاتورة</string>
+    <string name="invoice_date">تاريخ الفاتورة</string>
+    <string name="invoice_subtotal">المجموع الفرعي</string>
+    <string name="invoice_discount">الخصم</string>
+    <string name="invoice_total">الإجمالي</string>
+    <string name="invoice_paid">المدفوع</string>
+    <string name="invoice_remaining">المتبقي</string>
+    <string name="invoice_status_fully_paid">مدفوع بالكامل</string>
+
+    <!-- Settings -->
+    <string name="settings_language">اللغة</string>
+    <string name="settings_currency">العملة</string>
+    <string name="settings_store_name">اسم المتجر</string>
+    <string name="settings_store_logo">شعار المتجر</string>
+    <string name="settings_low_stock_warning">تنبيه نقص المخزون</string>
+    <string name="settings_credit_sales">السماح بالمبيعات الآجلة</string>
+    <string name="settings_printer_size">حجم الطابعة</string>
+
+    <!-- Customer Detail Activity -->
+    <string name="customer_detail_make_payment">تسديد دفعة</string>
+    <string name="customer_detail_edit_customer">تعديل العميل</string>
+    <string name="customer_detail_unpaid_invoices_count">%d فواتير مستحقة</string>
+    <string name="customer_detail_total_outstanding">إجمالي المستحق</string>
+    <string name="customer_detail_total_credit_label">إجمالي الدين</string>
+    <string name="customer_detail_outstanding_invoices_title">الفواتير المستحقة</string>
+    <string name="customer_detail_no_outstanding_invoices">لا توجد فواتير مستحقة</string>
+    <string name="customer_detail_export_statement">تصدير كشف الحساب</string>
+    <string name="customer_detail_phone_label">الهاتف:</string>
+    <string name="customer_detail_email_label">البريد:</string>
+    <string name="customer_detail_address_label">العنوان:</string>
+    <string name="customer_detail_balance_label">الرصيد:</string>
+    <string name="not_specified">غير محدد</string>
+    <string name="action_share_pdf_text">مشاركة PDF</string>
+</resources>
