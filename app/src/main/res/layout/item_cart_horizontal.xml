@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="65dp"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#ECEFF1">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:layoutDirection="rtl">
+
+        <!-- اليمين: اسم المنتج -->
+        <TextView
+            android:id="@+id/tvHorizontalCartName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#263238"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:gravity="right" />
+
+        <!-- المنتصف: الكمية والسعر -->
+        <TextView
+            android:id="@+id/tvHorizontalCartQtyPrice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:textSize="12sp"
+            android:textColor="#78909C"
+            android:gravity="center" />
+
+        <!-- اليسار: الإجمالي -->
+        <TextView
+            android:id="@+id/tvHorizontalCartTotal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.2"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#1B5E20"
+            android:gravity="left" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
