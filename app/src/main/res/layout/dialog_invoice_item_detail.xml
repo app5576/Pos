@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:layoutDirection="rtl">
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:padding="20dp"
+         android:orientation="vertical">
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:layout_marginBottom="16dp"
+             android:textSize="22sp"
+             android:textColor="#1976D2"
+             android:id="@+id/tv_item_product_name"
+             android:text="اسم المنتج"
+             android:textStyle="bold" />
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:layout_marginBottom="16dp"
+             android:background="#F8F9FA"
+             android:padding="10dp"
+             android:orientation="horizontal">
+
+            <LinearLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:orientation="vertical"
+                 android:layout_weight="1">
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:textSize="12sp"
+                     android:text="سعر التكلفة" />
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:textColor="#E53935"
+                     android:id="@+id/tv_item_buy_price"
+                     android:text="0.00"
+                     android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:orientation="vertical"
+                 android:layout_weight="1">
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:textSize="12sp"
+                     android:text="الربح المتوقع" />
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:textColor="#2E7D32"
+                     android:id="@+id/tv_item_expected_profit"
+                     android:text="0.00"
+                     android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:hint="الكمية"
+             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:inputType="numberDecimal"
+                 android:id="@+id/et_item_quantity" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:hint="سعر الوحدة"
+             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+             android:layout_marginTop="12dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:inputType="numberDecimal"
+                 android:id="@+id/et_item_sell_price" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:background="#1976D2"
+             android:padding="12dp"
+             android:orientation="horizontal"
+             android:layout_marginTop="16dp">
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:textSize="18sp"
+                 android:textColor="#FFFFFF"
+                 android:text="إجمالي الصنف:"
+                 android:textStyle="bold" />
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:gravity="left"
+                 android:textSize="18sp"
+                 android:textColor="#FFFFFF"
+                 android:id="@+id/tv_item_total_price"
+                 android:text="0.00 ر.س"
+                 android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textColor="#E53935"
+             style="@style/Widget.MaterialComponents.Button.TextButton"
+             android:layout_marginTop="8dp"
+             android:id="@+id/btn_remove_item"
+             android:text="🗑️ حذف هذا الصنف من الفاتورة" />
+
+    </LinearLayout>
+
+</ScrollView>
