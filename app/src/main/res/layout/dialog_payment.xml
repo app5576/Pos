@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layoutDirection="rtl">
+
+    <TextView
+        android:id="@+id/tv_payment_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="المبلغ المراد تسديده"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:id="@+id/tv_current_credit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="12sp"
+        android:textColor="#E53935"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="المبلغ *"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_payment_amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:text="0" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>
