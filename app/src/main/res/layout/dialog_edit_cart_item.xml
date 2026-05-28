@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layoutDirection="rtl">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- اسم المنتج -->
+        <TextView
+            android:id="@+id/tv_dialog_edit_product_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="اسم المنتج"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="12dp"
+            android:gravity="right" />
+
+        <!-- السعر الحالي -->
+        <TextView
+            android:id="@+id/tv_dialog_edit_original_price"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="السعر الحالي في السلة: 0.00 ر.س"
+            android:textSize="15sp"
+            android:textColor="#757575"
+            android:layout_marginBottom="4dp"
+            android:gravity="right" />
+
+        <!-- تكلفة المنتج -->
+        <TextView
+            android:id="@+id/tv_dialog_edit_buy_price"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="تكلفة المنتج: 0.00 ر.س"
+            android:textSize="15sp"
+            android:textColor="#E53935"
+            android:layout_marginBottom="16dp"
+            android:gravity="right" />
+
+        <!-- تعديل الكمية -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="الكمية"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_dialog_edit_quantity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:text="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- تعديل سعر البيع -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="سعر البيع الجديد"
+            app:helperText="لا يمكن البيع بأقل من سعر الشراء"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_dialog_edit_sell_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- ملاحظات -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="ملاحظات (اختياري)"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_dialog_edit_notes_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:lines="2" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- زر حذف المنتج من السلة -->
+        <Button
+            android:id="@+id/btn_remove_from_cart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="إزالة من السلة"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#E53935"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+</ScrollView>
