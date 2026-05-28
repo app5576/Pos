@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layoutDirection="rtl">
+
+    <EditText
+        android:id="@+id/et_new_item_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="اسم المنتج"
+        android:inputType="text"
+        android:layout_marginBottom="12dp"
+        android:padding="12dp"
+        android:background="@drawable/edit_text_background" />
+
+    <EditText
+        android:id="@+id/et_new_item_qty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="الكمية"
+        android:inputType="numberDecimal"
+        android:text="1"
+        android:layout_marginBottom="12dp"
+        android:padding="12dp"
+        android:background="@drawable/edit_text_background" />
+
+    <EditText
+        android:id="@+id/et_new_item_price"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="سعر الوحدة"
+        android:inputType="numberDecimal"
+        android:layout_marginBottom="12dp"
+        android:padding="12dp"
+        android:background="@drawable/edit_text_background" />
+
+</LinearLayout>
