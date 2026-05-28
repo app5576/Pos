@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="ادارة البيانات">
+        <Preference
+            android:key="manage_categories"
+            android:title="المجموعات"
+            android:summary="اضافة وتعديل وحذف مجموعات الاصناف" />
+        
+        <Preference
+            android:key="manage_units"
+            android:title="وحدات العبوة"
+            android:summary="اضافة وتعديل وحذف وحدات القياس" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="استيراد وتصدير Excel">
+        <Preference
+            android:key="import_excel"
+            android:title="استيراد المنتجات من Excel"
+            android:summary="استيراد قائمة المنتجات من ملف Excel (.xls)" />
+        
+        <Preference
+            android:key="export_excel"
+            android:title="تصدير المنتجات إلى Excel"
+            android:summary="تصدير جميع المنتجات إلى ملف Excel" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="نسخ احتياطي">
+        <Preference
+            android:key="backup_data"
+            android:title="انشاء نسخة احتياطية"
+            android:summary="حفظ نسخة من قاعدة البيانات" />
+        <Preference
+            android:key="restore_data"
+            android:title="استعادة البيانات"
+            android:summary="استعادة البيانات من ملف نسخة احتياطية" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="اعدادات المتجر">
+        <EditTextPreference android:key="store_name" android:title="اسم المتجر" android:defaultValue="متجري" />
+        <EditTextPreference android:key="store_phone" android:title="هاتف المتجر" />
+        <EditTextPreference android:key="store_address" android:title="عنوان المتجر" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="اعدادات الحساب">
+        <EditTextPreference android:key="login_username" android:title="اسم المستخدم" android:defaultValue="admin" />
+        <EditTextPreference android:key="login_password" android:title="كلمة المرور" android:defaultValue="1234" android:inputType="textPassword" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="اعدادات مالية">
+        <EditTextPreference android:key="tax_rate" android:title="نسبة الضريبة (%)" android:defaultValue="15" android:inputType="numberDecimal" />
+        <EditTextPreference android:key="currency" android:title="رمز العملة" android:defaultValue="ر.س" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="اعدادات الطباعة">
+        <SwitchPreferenceCompat android:key="auto_print" android:title="طباعة تلقائية" android:defaultValue="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="تنبيهات">
+        <SwitchPreferenceCompat android:key="low_stock_alert" android:title="تنبيه انخفاض المخزون" android:defaultValue="true" />
+        <EditTextPreference android:key="min_stock_default" android:title="الحد الادنى للمخزون" android:defaultValue="5" android:inputType="number" />
+        <SwitchPreferenceCompat android:key="allow_out_of_stock_sales" android:title="السماح بالبيع عند نفاد المخزون" android:defaultValue="false" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
