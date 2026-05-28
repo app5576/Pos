@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_suppliers"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="الموردون" />
+    <item
+        android:id="@+id/navigation_purchases"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="المشتريات" />
+    <item
+        android:id="@+id/navigation_cash"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="الصندوق" />
+    <item
+        android:id="@+id/navigation_expenses"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="المصاريف" />
+    <item
+        android:id="@+id/navigation_settings"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="الإعدادات" />
+    <item
+        android:id="@+id/navigation_sync"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="مزامنة" />
+    <item
+        android:id="@+id/navigation_logout"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="تسجيل الخروج" />
+</menu>
