@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "dqL3vUSQpW0FTR_LQiDrP"
+uri = "file://MicroPOS_modified.zip"
+type = "unspecified"
+title = "MicroPOS - المشروع المعدّل"
