@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layoutDirection="rtl">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- اسم المنتج -->
+        <TextView
+            android:id="@+id/tv_dialog_product_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="اسم المنتج"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp"
+            android:gravity="right" />
+
+        <!-- تكلفة المنتج -->
+        <TextView
+            android:id="@+id/tv_dialog_product_cost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="تكلفة المنتج: 0.00 ر.س"
+            android:textSize="14sp"
+            android:textColor="#E53935"
+            android:layout_marginBottom="4dp"
+            android:gravity="right" />
+
+        <!-- المخزون المتاح -->
+        <TextView
+            android:id="@+id/tv_dialog_available_stock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="المخزون المتاح: 0"
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:layout_marginBottom="12dp"
+            android:gravity="right" />
+
+        <!-- اختيار الوحدة -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="اختر وحدة العبوة"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp"
+            android:gravity="right" />
+
+        <Spinner
+            android:id="@+id/spinner_product_units"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/card_background"
+            android:padding="8dp" />
+
+        <!-- سعر الوحدة الافتراضي -->
+        <TextView
+            android:id="@+id/tv_dialog_selected_unit_price"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="سعر الوحدة الافتراضي: 0.00 ر.س"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            android:layout_marginBottom="8dp"
+            android:gravity="right" />
+
+        <!-- حقل تعديل سعر البيع -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="سعر البيع (قابل للتعديل)"
+            app:helperText="يمكنك تعديل السعر - لا يمكن البيع بأقل من التكلفة"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_marginBottom="12dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_dialog_sell_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- الكمية -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="الكمية المطلوبة"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_dialog_quantity_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:text="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- ملاحظات -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="ملاحظات (اختياري)"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_dialog_notes_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:lines="2" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+</ScrollView>
