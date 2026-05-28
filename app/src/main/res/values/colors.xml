@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#1976D2</color>
+    <color name="colorPrimaryDark">#1565C0</color>
+    <color name="colorAccent">#FF9800</color>
+    <color name="background">#F5F5F5</color>
+    <color name="white">#FFFFFF</color>
+    <color name="text_primary">#212121</color>
+    <color name="card_background">#1976D2</color>
+    <color name="lighter_gray">#D3D3D3</color>
+    <color name="primary">#1976D2</color>
+    <color name="report_section_title">#2980B9</color>
+    <color name="report_section_bg">#ECF0F1</color>
+    <color name="report_button_text">#2C3E50</color>
+    <color name="report_button_bg">#FFFFFF</color>
+    <color name="date_range_btn">#34495E</color>
+    <color name="print_btn">#27AE60</color>
+</resources>
