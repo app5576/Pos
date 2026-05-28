@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layoutDirection="rtl">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="💳 إتمام عملية البيع"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            android:textColor="@color/primary"/>
+
+        <TextView android:id="@+id/tv_total_display" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="إجمالي الفاتورة: 0.00" android:textStyle="bold" android:textSize="16sp"/>
+        <TextView android:id="@+id/tv_balance_display" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="المتبقي: 0.00" android:textColor="#E53935" android:layout_marginBottom="10dp"/>
+
+        <RadioGroup
+            android:id="@+id/rg_payment_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/rb_cash" android:layout_width="0dp" android:layout_weight="1" android:text="نقدًا" android:checked="true"/>
+            <RadioButton android:id="@+id/rb_card" android:layout_width="0dp" android:layout_weight="1" android:text="بطاقة"/>
+            <RadioButton android:id="@+id/rb_credit" android:layout_width="0dp" android:layout_weight="1" android:text="آجل"/>
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/et_discount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="الخصم"
+            android:digits="0123456789."
+            android:inputType="numberDecimal"
+            android:text="0"/>
+
+        <EditText
+            android:id="@+id/et_paid_amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="المبلغ المدفوع"
+            android:digits="0123456789."
+            android:inputType="numberDecimal"/>
+
+        <AutoCompleteTextView
+            android:id="@+id/actv_customer"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="اسم العميل"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:id="@+id/et_notes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="ملاحظات"
+            android:inputType="textMultiLine"/>
+
+    </LinearLayout>
+</ScrollView>
